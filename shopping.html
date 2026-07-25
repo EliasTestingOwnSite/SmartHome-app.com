@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping List</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>My App</h1></header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="shopping.html" class="active">Shopping</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="gym.html">Gym</a>
+    <a href="weather.html">Weather</a>
+  </nav>
+  <main>
+    <h2>Shopping List</h2>
+    <input type="text" id="item-input" placeholder="Add item..." />
+    <button id="add-btn">Add</button>
+    <ul id="shopping-list"></ul>
+    <p><small>Not saved yet — refreshing clears the list.</small></p>
+  </main>
+  <script src="shopping.js"></script>
+</body>
+</html>

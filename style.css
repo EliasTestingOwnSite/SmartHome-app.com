@@ -1,0 +1,66 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+}
+
+header {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem;
+  background: #1a1a1a;
+}
+
+nav a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+nav a:hover, nav a.active {
+  color: #fff;
+  text-decoration: underline;
+}
+
+main {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+ul#shopping-list {
+  list-style: none;
+  padding: 0;
+}
+
+ul#shopping-list li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+}
+
+input[type="text"] {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: #eee;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #3a7afe;
+  color: white;
+  cursor: pointer;
+}
