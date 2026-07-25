@@ -20,8 +20,12 @@
     <input type="text" id="item-input" placeholder="Add item..." />
     <button id="add-btn">Add</button>
     <ul id="shopping-list"></ul>
-    <p><small>Not saved yet — refreshing clears the list.</small></p>
   </main>
+
+  <!-- Firebase SDKs (compat version, no build tools needed) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="shopping.js"></script>
 </body>
 </html>
