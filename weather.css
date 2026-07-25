@@ -1,0 +1,96 @@
+/* Weather page specific styling */
+
+.weather-hero {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+.weather-hero h2 {
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.weather-hero p {
+  color: #999;
+  margin-top: 0.25rem;
+}
+
+.add-city-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.city-card {
+  border-radius: 16px;
+  padding: 1.25rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.city-card.clear   { background: linear-gradient(145deg, #2b6cb0, #63b3ed); }
+.city-card.cloudy  { background: linear-gradient(145deg, #4a5568, #718096); }
+.city-card.rain    { background: linear-gradient(145deg, #1a365d, #3182ce); }
+.city-card.snow    { background: linear-gradient(145deg, #718096, #e2e8f0); color: #1a202c; }
+.city-card.storm   { background: linear-gradient(145deg, #1a1a2e, #4a148c); }
+
+.city-card .city-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.city-card .temp {
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+  line-height: 1;
+}
+
+.city-card .condition {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.city-card .rain-chance {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0.9;
+}
+
+.city-card .card-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.city-card .card-actions button {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: inherit;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.city-card .card-actions button:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+#radar-frame {
+  margin-top: 0.5rem;
+}

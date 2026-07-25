@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weather</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="weather.css" />
 </head>
 <body>
   <header><h1>My App</h1></header>
@@ -15,18 +16,24 @@
     <a href="gym.html">Gym</a>
     <a href="weather.html" class="active">Weather</a>
   </nav>
+
   <main>
-    <h2>Weather</h2>
+    <div class="weather-hero">
+      <h2>Weather</h2>
+      <p>Your saved places, at a glance.</p>
+    </div>
 
-    <input type="text" id="city-input" placeholder="Add a city..." />
-    <button id="add-city-btn">Add</button>
+    <div class="add-city-row">
+      <input type="text" id="city-input" placeholder="Add a city..." />
+      <button id="add-city-btn">Add</button>
+    </div>
 
-    <div id="city-list"></div>
+    <div class="city-grid" id="city-list"></div>
 
     <h3>Rain Radar</h3>
     <iframe id="radar-frame"
       width="100%" height="400"
-      style="border:0; border-radius:8px;"
+      style="border:0; border-radius:12px;"
       src="https://embed.windy.com/embed2.html?lat=47.5&lon=14.5&zoom=6&overlay=radar">
     </iframe>
   </main>
