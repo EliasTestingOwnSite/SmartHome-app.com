@@ -1,11 +1,10 @@
 const cityInput = document.getElementById("city-input");
 const addCityBtn = document.getElementById("add-city-btn");
-const cityList = document.getElementById("city-list");
+const cityScroller = document.getElementById("city-scroller");
 const radarFrame = document.getElementById("radar-frame");
 
 const citiesRef = db.collection("weatherCities");
 
-// Maps Open-Meteo's weather codes to a category, icon, and readable text
 function describeWeather(code) {
   if (code === 0) return { category: "clear", icon: "☀️", text: "Clear sky" };
   if ([1, 2, 3].includes(code)) return { category: "cloudy", icon: "⛅", text: "Partly cloudy" };
@@ -22,41 +21,41 @@ async function geocodeCity(name) {
   const data = await res.json();
   if (!data.results || data.results.length === 0) return null;
   const result = data.results[0];
-  // Include country/region so it's clear exactly which place was matched
   const label = result.admin1
     ? `${result.name}, ${result.admin1}, ${result.country}`
     : `${result.name}, ${result.country}`;
   return { name: label, lat: result.latitude, lon: result.longitude };
 }
 
-// Current weather + rain chance for right now
-async function getWeather(lat, lon) {
+// Full forecast: current conditions, today's high/low, and next 24h hourly data
+async function getForecast(lat, lon) {
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&current_weather=true&hourly=precipitation_probability&timezone=auto`
+    `&current_weather=true` +
+    `&hourly=temperature_2m,precipitation_probability,weathercode` +
+    `&daily=temperature_2m_max,temperature_2m_min` +
+    `&timezone=auto`
   );
-  const data = await res.json();
+  return res.json();
+}
 
-  let rainChance = null;
-  if (data.hourly && data.current_weather) {
-    const currentTime = new Date(data.current_weather.time).getTime();
-    let closestIdx = 0;
-    let closestDiff = Infinity;
-    data.hourly.time.forEach((t, i) => {
-      const diff = Math.abs(new Date(t).getTime() - currentTime);
-      if (diff < closestDiff) {
-        closestDiff = diff;
-        closestIdx = i;
-      }
-    });
-    rainChance = data.hourly.precipitation_probability[closestIdx];
-  }
+function closestHourlyIndex(hourlyTimes, currentTimeStr) {
+  const currentTime = new Date(currentTimeStr).getTime();
+  let closestIdx = 0;
+  let closestDiff = Infinity;
+  hourlyTimes.forEach((t, i) => {
+    const diff = Math.abs(new Date(t).getTime() - currentTime);
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestIdx = i;
+    }
+  });
+  return closestIdx;
+}
 
-  return {
-    temperature: data.current_weather.temperature,
-    weathercode: data.current_weather.weathercode,
-    rainChance
-  };
+function formatHour(isoTime) {
+  const d = new Date(isoTime);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function moveRadarTo(lat, lon) {
@@ -65,25 +64,43 @@ function moveRadarTo(lat, lon) {
 
 async function renderCities() {
   const snapshot = await citiesRef.get();
-  cityList.innerHTML = "";
+  cityScroller.innerHTML = "";
 
   snapshot.forEach(async (doc) => {
     const city = doc.data();
-    const weather = await getWeather(city.lat, city.lon);
-    const info = describeWeather(weather.weathercode);
+    const data = await getForecast(city.lat, city.lon);
+    const info = describeWeather(data.current_weather.weathercode);
+    const nowIdx = closestHourlyIndex(data.hourly.time, data.current_weather.time);
+
+    // Build next 12 hours strip starting from now
+    let hourlyHtml = "";
+    for (let i = nowIdx; i < Math.min(nowIdx + 12, data.hourly.time.length); i++) {
+      const hInfo = describeWeather(data.hourly.weathercode[i]);
+      hourlyHtml += `
+        <div class="hour-block">
+          <div class="hour-time">${i === nowIdx ? "Now" : formatHour(data.hourly.time[i])}</div>
+          <div class="hour-icon">${hInfo.icon}</div>
+          <div class="hour-temp">${Math.round(data.hourly.temperature_2m[i])}°</div>
+          <div class="hour-rain">${data.hourly.precipitation_probability[i]}%</div>
+        </div>
+      `;
+    }
 
     const card = document.createElement("div");
-    card.className = `city-card ${info.category}`;
-
+    card.className = `city-page ${info.category}`;
     card.innerHTML = `
-      <div class="city-name">${city.name}</div>
-      <div class="temp">${info.icon} ${Math.round(weather.temperature)}°C</div>
-      <div class="condition">${info.text}</div>
-      <div class="rain-chance">🌧️ ${weather.rainChance !== null ? weather.rainChance + "% chance of rain" : "Rain data unavailable"}</div>
-      <div class="card-actions">
-        <button class="radar-btn">Show on radar</button>
-        <button class="remove-btn">Remove</button>
+      <button class="remove-btn">✕</button>
+      <div class="city-page-header">
+        <div class="city-page-name">${city.name}</div>
+        <div class="city-page-condition">${info.text}</div>
       </div>
+      <div class="city-page-temp">${info.icon} ${Math.round(data.current_weather.temperature)}°C</div>
+      <div class="city-page-hilo">H: ${Math.round(data.daily.temperature_2m_max[0])}° &nbsp; L: ${Math.round(data.daily.temperature_2m_min[0])}°</div>
+      <div class="city-page-rain">🌧️ ${data.hourly.precipitation_probability[nowIdx]}% chance of rain right now</div>
+
+      <div class="hourly-strip">${hourlyHtml}</div>
+
+      <button class="radar-btn">Show on radar</button>
     `;
 
     card.querySelector(".radar-btn").addEventListener("click", () => moveRadarTo(city.lat, city.lon));
@@ -91,7 +108,7 @@ async function renderCities() {
       citiesRef.doc(doc.id).delete().then(renderCities);
     });
 
-    cityList.appendChild(card);
+    cityScroller.appendChild(card);
   });
 }
 

@@ -1,96 +1,112 @@
-/* Weather page specific styling */
+/* Swipeable full-width city pages, Apple Weather style */
 
-.weather-hero {
+.city-scroller {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.city-scroller::-webkit-scrollbar { display: none; }
+
+.city-page {
+  min-width: 100%;
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  padding: 3rem 1.5rem 2rem;
+  color: white;
+  position: relative;
+  min-height: 70vh;
+}
+
+.city-page.clear   { background: linear-gradient(180deg, #2b6cb0, #63b3ed); }
+.city-page.cloudy  { background: linear-gradient(180deg, #4a5568, #718096); }
+.city-page.rain    { background: linear-gradient(180deg, #1a365d, #3182ce); }
+.city-page.snow    { background: linear-gradient(180deg, #718096, #e2e8f0); color: #1a202c; }
+.city-page.storm   { background: linear-gradient(180deg, #1a1a2e, #4a148c); }
+
+.city-page .remove-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: inherit;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.city-page-header {
   text-align: center;
-  padding: 2rem 1rem 1rem;
 }
 
-.weather-hero h2 {
-  font-size: 2rem;
-  margin: 0;
-  letter-spacing: -0.5px;
+.city-page-name {
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
-.weather-hero p {
-  color: #999;
-  margin-top: 0.25rem;
+.city-page-condition {
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+.city-page-temp {
+  text-align: center;
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.city-page-hilo {
+  text-align: center;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.city-page-rain {
+  text-align: center;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.hourly-strip {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.25rem;
+  background: rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.hour-block {
+  text-align: center;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.hour-time { font-size: 0.8rem; opacity: 0.85; }
+.hour-icon { font-size: 1.3rem; margin: 0.3rem 0; }
+.hour-temp { font-weight: 600; }
+.hour-rain { font-size: 0.75rem; opacity: 0.8; }
+
+.radar-btn {
+  display: block;
+  margin: 1.5rem auto 0;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: inherit;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .add-city-row {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin: 1.5rem 0;
-}
-
-.city-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.city-card {
-  border-radius: 16px;
-  padding: 1.25rem;
-  color: white;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.city-card.clear   { background: linear-gradient(145deg, #2b6cb0, #63b3ed); }
-.city-card.cloudy  { background: linear-gradient(145deg, #4a5568, #718096); }
-.city-card.rain    { background: linear-gradient(145deg, #1a365d, #3182ce); }
-.city-card.snow    { background: linear-gradient(145deg, #718096, #e2e8f0); color: #1a202c; }
-.city-card.storm   { background: linear-gradient(145deg, #1a1a2e, #4a148c); }
-
-.city-card .city-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.city-card .temp {
-  font-size: 2.75rem;
-  font-weight: 700;
-  margin: 0.25rem 0;
-  line-height: 1;
-}
-
-.city-card .condition {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.city-card .rain-chance {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  opacity: 0.9;
-}
-
-.city-card .card-actions {
-  margin-top: 0.75rem;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.city-card .card-actions button {
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: inherit;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.city-card .card-actions button:hover {
-  background: rgba(255,255,255,0.3);
-}
-
-#radar-frame {
-  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #1a1a1a;
 }
