@@ -1,32 +1,77 @@
-/* Swipeable full-width city pages, Apple Weather style */
-
-.city-scroller {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
+.weather-main {
+  max-width: 500px;
+  margin: 1.5rem auto;
+  padding: 0 1rem 5rem; /* bottom padding so fixed search bar never covers content */
 }
 
-.city-scroller::-webkit-scrollbar { display: none; }
+/* Fixed-size scrollable box, ~4 rows visible */
+.city-box {
+  border-radius: 16px;
+  overflow-y: auto;
+  max-height: 288px; /* ~4 rows */
+  background: #1a2436;
+  border: 1px solid #2a3550;
+}
 
-.city-page {
-  min-width: 100%;
-  scroll-snap-align: start;
-  box-sizing: border-box;
-  padding: 3rem 1.5rem 2rem;
+.city-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #2a3550;
+  cursor: pointer;
+}
+
+.city-row:last-child { border-bottom: none; }
+.city-row:hover { background: #22304a; }
+
+.city-row .row-name {
+  font-weight: 600;
+}
+
+.city-row .row-condition {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.city-row .row-temp {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Detail view, shown when a city row is clicked */
+.city-detail {
+  margin-top: 1rem;
+}
+
+.city-detail:empty { display: none; }
+
+.detail-card {
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
   color: white;
   position: relative;
-  min-height: 70vh;
 }
 
-.city-page.clear   { background: linear-gradient(180deg, #2b6cb0, #63b3ed); }
-.city-page.cloudy  { background: linear-gradient(180deg, #4a5568, #718096); }
-.city-page.rain    { background: linear-gradient(180deg, #1a365d, #3182ce); }
-.city-page.snow    { background: linear-gradient(180deg, #718096, #e2e8f0); color: #1a202c; }
-.city-page.storm   { background: linear-gradient(180deg, #1a1a2e, #4a148c); }
+.detail-card.clear   { background: linear-gradient(180deg, #2b6cb0, #63b3ed); }
+.detail-card.cloudy  { background: linear-gradient(180deg, #4a5568, #718096); }
+.detail-card.rain    { background: linear-gradient(180deg, #1a365d, #3182ce); }
+.detail-card.snow    { background: linear-gradient(180deg, #718096, #e2e8f0); color: #1a202c; }
+.detail-card.storm   { background: linear-gradient(180deg, #1a1a2e, #4a148c); }
 
-.city-page .remove-btn {
+.detail-card .back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: inherit;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.detail-card .remove-btn {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -39,34 +84,27 @@
   cursor: pointer;
 }
 
-.city-page-header {
+.detail-name {
   text-align: center;
-}
-
-.city-page-name {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
+  margin-top: 1.5rem;
 }
 
-.city-page-condition {
-  opacity: 0.85;
-  font-size: 0.95rem;
-}
-
-.city-page-temp {
+.detail-condition {
   text-align: center;
-  font-size: 4rem;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+.detail-temp {
+  text-align: center;
+  font-size: 3.5rem;
   font-weight: 700;
   margin: 0.5rem 0 0.25rem;
 }
 
-.city-page-hilo {
-  text-align: center;
-  opacity: 0.9;
-  margin-bottom: 0.5rem;
-}
-
-.city-page-rain {
+.detail-hilo {
   text-align: center;
   opacity: 0.9;
   margin-bottom: 1.5rem;
@@ -92,21 +130,15 @@
 .hour-temp { font-weight: 600; }
 .hour-rain { font-size: 0.75rem; opacity: 0.8; }
 
-.radar-btn {
-  display: block;
-  margin: 1.5rem auto 0;
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: inherit;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 .add-city-row {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   gap: 0.5rem;
   justify-content: center;
   padding: 1rem;
   background: #1a1a1a;
+  border-top: 1px solid #333;
 }

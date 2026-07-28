@@ -1,7 +1,7 @@
 const cityInput = document.getElementById("city-input");
 const addCityBtn = document.getElementById("add-city-btn");
-const cityScroller = document.getElementById("city-scroller");
-const radarFrame = document.getElementById("radar-frame");
+const cityBox = document.getElementById("city-box");
+const cityDetail = document.getElementById("city-detail");
 
 const citiesRef = db.collection("weatherCities");
 
@@ -27,14 +27,14 @@ async function geocodeCity(name) {
   return { name: label, lat: result.latitude, lon: result.longitude };
 }
 
-// Full forecast: current conditions, today's high/low, and next 24h hourly data
+// Using the ICON model (German weather service) - generally more accurate for Central Europe
 async function getForecast(lat, lon) {
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current_weather=true` +
     `&hourly=temperature_2m,precipitation_probability,weathercode` +
     `&daily=temperature_2m_max,temperature_2m_min` +
-    `&timezone=auto`
+    `&timezone=auto&models=icon_seamless`
   );
   return res.json();
 }
@@ -53,62 +53,78 @@ function closestHourlyIndex(hourlyTimes, currentTimeStr) {
   return closestIdx;
 }
 
+// 24-hour format, e.g. "14:00"
 function formatHour(isoTime) {
   const d = new Date(isoTime);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
-function moveRadarTo(lat, lon) {
-  radarFrame.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&overlay=radar`;
-}
+// Cache of last-fetched forecast per city id, so clicking a row doesn't re-fetch
+const forecastCache = {};
 
-async function renderCities() {
+async function renderCityBox() {
   const snapshot = await citiesRef.get();
-  cityScroller.innerHTML = "";
+  cityBox.innerHTML = "";
 
   snapshot.forEach(async (doc) => {
     const city = doc.data();
     const data = await getForecast(city.lat, city.lon);
+    forecastCache[doc.id] = { city, data };
+
     const info = describeWeather(data.current_weather.weathercode);
-    const nowIdx = closestHourlyIndex(data.hourly.time, data.current_weather.time);
 
-    // Build next 12 hours strip starting from now
-    let hourlyHtml = "";
-    for (let i = nowIdx; i < Math.min(nowIdx + 12, data.hourly.time.length); i++) {
-      const hInfo = describeWeather(data.hourly.weathercode[i]);
-      hourlyHtml += `
-        <div class="hour-block">
-          <div class="hour-time">${i === nowIdx ? "Now" : formatHour(data.hourly.time[i])}</div>
-          <div class="hour-icon">${hInfo.icon}</div>
-          <div class="hour-temp">${Math.round(data.hourly.temperature_2m[i])}°</div>
-          <div class="hour-rain">${data.hourly.precipitation_probability[i]}%</div>
-        </div>
-      `;
-    }
-
-    const card = document.createElement("div");
-    card.className = `city-page ${info.category}`;
-    card.innerHTML = `
-      <button class="remove-btn">✕</button>
-      <div class="city-page-header">
-        <div class="city-page-name">${city.name}</div>
-        <div class="city-page-condition">${info.text}</div>
+    const row = document.createElement("div");
+    row.className = "city-row";
+    row.innerHTML = `
+      <div>
+        <div class="row-name">${city.name}</div>
+        <div class="row-condition">${info.text}</div>
       </div>
-      <div class="city-page-temp">${info.icon} ${Math.round(data.current_weather.temperature)}°C</div>
-      <div class="city-page-hilo">H: ${Math.round(data.daily.temperature_2m_max[0])}° &nbsp; L: ${Math.round(data.daily.temperature_2m_min[0])}°</div>
-      <div class="city-page-rain">🌧️ ${data.hourly.precipitation_probability[nowIdx]}% chance of rain right now</div>
-
-      <div class="hourly-strip">${hourlyHtml}</div>
-
-      <button class="radar-btn">Show on radar</button>
+      <div class="row-temp">${info.icon} ${Math.round(data.current_weather.temperature)}°</div>
     `;
+    row.addEventListener("click", () => showDetail(doc.id));
+    cityBox.appendChild(row);
+  });
+}
 
-    card.querySelector(".radar-btn").addEventListener("click", () => moveRadarTo(city.lat, city.lon));
-    card.querySelector(".remove-btn").addEventListener("click", () => {
-      citiesRef.doc(doc.id).delete().then(renderCities);
+function showDetail(docId) {
+  const { city, data } = forecastCache[docId];
+  const info = describeWeather(data.current_weather.weathercode);
+  const nowIdx = closestHourlyIndex(data.hourly.time, data.current_weather.time);
+
+  let hourlyHtml = "";
+  for (let i = nowIdx; i < Math.min(nowIdx + 24, data.hourly.time.length); i++) {
+    const hInfo = describeWeather(data.hourly.weathercode[i]);
+    hourlyHtml += `
+      <div class="hour-block">
+        <div class="hour-time">${i === nowIdx ? "Now" : formatHour(data.hourly.time[i])}</div>
+        <div class="hour-icon">${hInfo.icon}</div>
+        <div class="hour-temp">${Math.round(data.hourly.temperature_2m[i])}°</div>
+        <div class="hour-rain">${data.hourly.precipitation_probability[i]}%</div>
+      </div>
+    `;
+  }
+
+  cityDetail.innerHTML = `
+    <div class="detail-card ${info.category}">
+      <button class="back-btn">← Back</button>
+      <button class="remove-btn">✕</button>
+      <div class="detail-name">${city.name}</div>
+      <div class="detail-condition">${info.text}</div>
+      <div class="detail-temp">${info.icon} ${Math.round(data.current_weather.temperature)}°C</div>
+      <div class="detail-hilo">H: ${Math.round(data.daily.temperature_2m_max[0])}° &nbsp; L: ${Math.round(data.daily.temperature_2m_min[0])}°</div>
+      <div class="hourly-strip">${hourlyHtml}</div>
+    </div>
+  `;
+
+  cityDetail.querySelector(".back-btn").addEventListener("click", () => {
+    cityDetail.innerHTML = "";
+  });
+  cityDetail.querySelector(".remove-btn").addEventListener("click", () => {
+    citiesRef.doc(docId).delete().then(() => {
+      cityDetail.innerHTML = "";
+      renderCityBox();
     });
-
-    cityScroller.appendChild(card);
   });
 }
 
@@ -124,7 +140,7 @@ addCityBtn.addEventListener("click", async () => {
 
   await citiesRef.add(location);
   cityInput.value = "";
-  renderCities();
+  renderCityBox();
 });
 
-renderCities();
+renderCityBox();
